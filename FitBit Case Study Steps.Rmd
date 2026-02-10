@@ -1,0 +1,754 @@
+---
+title: "The Sleep-Activity Trade-Off (Pre-COVID Baseline)"
+author: "by Lea N Harvin"
+date: "2026-02-09"
+output:
+  github_document: default
+  pdf_document: default
+---
+
+#### CSV resources: 
+https://www.kaggle.com/datasets/arashnic/fitbit/data
+
+https://raw.githubusercontent.com/GTPB/PSLS20/master/data/NHANES.csv
+
+```{r}
+#Install and load packages if needed
+# install.packages('tidyverse')
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+```
+
+#### Load CSV files
+```{r}
+# Create a dataframe named 'daily_activity'
+daily_activity <- read.csv("raw_data/dailyActivity_merged.csv")
+
+# Create dataframe for the sleep data. 
+sleep_day <- read.csv("raw_data/sleepDay_merged.csv")
+
+# Create dataframe for the weight log data. 
+weight_log <- read.csv("raw_data/weightLogInfo_merged.csv")
+
+# Create dataframe for NHANES Physical Activity data for comparison.
+NHANES_activity2009_2011 <- read.csv("raw_data/NHANES.csv")
+```
+
+
+## Data Initial Exploration
+
+**FitBit Daily Activity Data (Apr-May 2016)**
+```{r}
+# Identify all the columns in the daily_activity data.
+colnames(daily_activity)
+# Take a look at the daily_activity data.
+head(daily_activity)
+```
+
+**FitBit Sleep Data**
+```{r}
+# Identify all the columns in the sleep_day data.
+colnames(sleep_day)
+# Take a look at the sleep_day data.
+head(sleep_day)
+```
+
+**FitBit Weight Data**
+```{r}
+# Identify all the columns in the weight_log data.
+colnames(weight_log)
+# there is a BMI column in this dataframe you could compare to the NHANES data.
+head(weight_log)
+
+# Note that all 3 FitBit datasets have the 'Id' field - 
+# this can be used to merge the datasets.
+```
+
+**NHANES Physical Activity Date (2009-2011)**
+```{r}
+# Identify all the columns in the NHANES_activity data.
+colnames(NHANES_activity2009_2011)
+head(NHANES_activity2009_2011)
+```
+
+
+#### Summary statistics 
+
+How many unique participants are there in each dataframe? 
+
+```{r}
+# It looks like there may be more participants in the daily activity 
+# dataset than the sleep dataset.
+n_distinct(daily_activity$Id)             #  33
+n_distinct(sleep_day$Id)                  #  24
+n_distinct(weight_log$Id)                 #   8
+n_distinct(NHANES_activity2009_2011$ID)   #6779
+```
+ How many observations are there in each dataframe?
+ 
+```{r}
+nrow(daily_activity)            #  940
+nrow(sleep_day)                 #  413
+nrow(weight_log)                #   67
+nrow(NHANES_activity2009_2011)  #10000
+
+# filter the original data frame to just the female participants
+NHANES_females <- NHANES_activity2009_2011 %>% filter(Gender == "female")
+nrow(NHANES_females)            #5020
+
+```
+
+##### For the daily activity dataframe:
+```{r}
+daily_activity %>%  
+  select(TotalSteps,
+         TotalDistance,
+         SedentaryMinutes) %>%
+  summary()
+
+ #  TotalSteps    TotalDistance    SedentaryMinutes
+ #  Min.   :    0   Min.   : 0.000   Min.   :   0.0  
+ #  1st Qu.: 3790   1st Qu.: 2.620   1st Qu.: 729.8  
+ #  Median : 7406   Median : 5.245   Median :1057.5  
+ #  Mean   : 7638   Mean   : 5.490   Mean   : 991.2  
+ #  3rd Qu.:10727   3rd Qu.: 7.713   3rd Qu.:1229.5  
+ #  Max.   :36019   Max.   :28.030   Max.   :1440.0
+```
+
+##### For the sleep dataframe:
+```{r}
+# convert minutes of sleep to hours
+sleep_day <- sleep_day %>%
+  mutate(TotalHoursAsleep = TotalMinutesAsleep / 60)
+
+sleep_day %>%  
+  select(TotalSleepRecords,
+         TotalHoursAsleep,
+         TotalTimeInBed) %>%
+  summary()
+
+#TotalSleepRecords TotalHoursAsleep  TotalTimeInBed 
+# Min.   :1.000     Min.   : 0.9667   Min.   : 61.0  
+# 1st Qu.:1.000     1st Qu.: 6.0167   1st Qu.:403.0  
+# Median :1.000     Median : 7.2167   Median :463.0  
+# Mean   :1.119     Mean   : 6.9911   Mean   :458.6  
+# 3rd Qu.:1.000     3rd Qu.: 8.1667   3rd Qu.:526.0  
+# Max.   :3.000     Max.   :13.2667   Max.   :961.0
+```
+
+##### For the weight dataframe:
+```{r}
+weight_log %>%  
+  select(WeightPounds,
+         Fat,
+         BMI) %>%
+  summary()
+
+#  WeightPounds        Fat             BMI       
+# Min.   :116.0   Min.   :22.00   Min.   :21.45  
+# 1st Qu.:135.4   1st Qu.:22.75   1st Qu.:23.96  
+# Median :137.8   Median :23.50   Median :24.39  
+# Mean   :158.8   Mean   :23.50   Mean   :25.19  
+# 3rd Qu.:187.5   3rd Qu.:24.25   3rd Qu.:25.56  
+# Max.   :294.3   Max.   :25.00   Max.   :47.54  
+#                 NA's   :65 
+```
+
+##### For the NHANES dataframe (females only):
+```{r}
+NHANES_females %>%
+  select(SleepHrsNight, 
+         BMI) %>%
+  summary()
+
+#SleepHrsNight         BMI       
+# Min.   : 2.000   Min.   :12.88  
+# 1st Qu.: 6.000   1st Qu.:21.24  
+# Median : 7.000   Median :25.56  
+# Mean   : 6.991   Mean   :26.77  
+# 3rd Qu.: 8.000   3rd Qu.:31.20  
+# Max.   :12.000   Max.   :81.25  
+# NA's   :1079     NA's   :179
+```
+
+What This Tells Us About the Sample's Activities:
+
+```{r}
+# Create a new column for sedentary hours --> this will be easier for audience to understand verses minutes.
+daily_activity <- daily_activity %>%
+  mutate(SedentaryHours = SedentaryMinutes / 60)
+
+# Create the plot with hours instead of minutes
+ggplot(data=daily_activity, aes(x=TotalSteps, y=SedentaryHours)) + 
+  geom_point(alpha = 0.5) +  # Semi-transparent points
+  geom_smooth(method = "lm", se = TRUE, color = "red") +  # Add trendline
+  labs(title = "Relationship Between Daily Steps and Sedentary Time",
+       x = "Total Steps",
+       y = "Sedentary Hours",
+       caption = "Data shows negative correlation: more steps = less sedentary time") +
+  theme_minimal()
+
+# Save plot
+ggsave("Relationship_Between_Daily_Steps_and_Sedentary_Time.png", width = 8, height = 6)
+```
+
+What's the relationship between minutes asleep and time in bed?
+
+```{r}
+# ggplot(data=sleep_day, aes(x=TotalMinutesAsleep, y=TotalTimeInBed)) + geom_point()
+
+# convert minutes to hours
+sleep_day <- sleep_day %>%
+  mutate(TotalHoursAsleep = TotalMinutesAsleep / 60) %>%
+  mutate(TotalHoursInBed = TotalTimeInBed / 60)
+
+# add a trend line to the above; is it helpful to have or no?
+ggplot(data=sleep_day, aes(x=TotalHoursAsleep, y=TotalHoursInBed)) + 
+  geom_point() +
+  geom_smooth(method = "lm", se = TRUE)+
+  labs(title = "Sleep Efficiency: Hours Asleep vs. Hours in Bed",
+       x = "Total Hours Asleep",
+       y = "Total Hours in Bed")+
+  theme_classic()
+
+# Save plot
+ggsave("Hours_Asleep_vs_Hours_in_Bed.png", width = 8, height = 6)
+```
+
+Calculate R² for Sleep Efficiency:
+
+```{r}
+# Calculate R² for Sleep Efficiency:
+# Use a linear model (gives you more info)
+sleep_model <- lm(TotalHoursInBed ~ TotalHoursAsleep, data = sleep_day)
+summary(sleep_model)
+
+# Extract R² from the model
+model_r_squared <- summary(sleep_model)$r.squared
+cat("\nR² from linear model:", round(model_r_squared, 3))
+```
+
+While there's a strong positive correlation between time in bed and actual 
+sleep (R² = 0.866), the vertical distance between points and the trendline 
+indicates time spent in bed but not sleeping.
+
+This scatter plot below better reveals sleep efficiency among FitBit users. 
+
+```{r}
+ggplot(data=sleep_day, aes(x=TotalHoursAsleep, y=TotalHoursInBed)) + 
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", se = TRUE, color = "blue") +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "red") +  # Perfect efficiency line
+  labs(title = "Sleep Efficiency: Hours Asleep vs. Hours in Bed",
+       x = "Total Hours Asleep",
+       y = "Total Hours in Bed",
+       caption = "Red dashed line = perfect sleep efficiency (time in bed = time asleep)\nBlue line = actual relationship showing sleep efficiency gap") +
+  theme_minimal()
+
+# Save plot
+ggsave("Hours_Asleep_vs_Hours_in_Bed_with_efficiency.png", width = 8, height = 6)
+```
+What could these trends tell you about how to help market this product? Or areas where you might want to explore further?
+
+- Develop/enhance **sleep efficiency metrics** that show users their actual sleep quality
+- Create **sleep hygiene recommendations** to reduce time spent lying awake [I don't like the use of the word "hygiene"]
+- Send **personalized insights**: 'You spent 45 minutes in bed but not asleep last night - try these tips to fall asleep faster'
+
+
+Merging the two data sets together
+```{r}
+combined_data <- merge(sleep_day, daily_activity, by="Id") # yields 24 unique IDs
+
+# change script above as outer-join
+#combined_data <- merge(sleep_day, daily_activity, by="Id", all=TRUE)
+# using the outer-join, yields 33 unique ids
+```
+
+Take a look at how many participants are in this data set.
+```{r}
+n_distinct(combined_data$Id)
+
+# [1] 24
+```
+
+
+```{r}
+# Extract just the date part (everything before the space) as a new column to compare on
+sleep_day <- sleep_day %>%
+  mutate(SleepActivityDate = substr(SleepDay, 1, nchar(SleepDay) - 12))  # Removes " 12:00:00 AM"
+
+# Now merge on dates
+combined_data_by_Id_and_Date <- merge(sleep_day, daily_activity, 
+                       by.x=c("Id", "SleepActivityDate"), 
+                       by.y=c("Id", "ActivityDate"))
+
+```
+
+Check data
+```{r}
+# check dimensions
+nrow(sleep_day)                        # Original sleep records
+nrow(daily_activity)                   # Original activity records  
+nrow(combined_data_by_Id_and_Date)     # Merged records (should be less than or equal to smallest dataset)
+
+# verify no duplicates were created
+combined_data_by_Id_and_Date %>%
+  group_by(Id, SleepActivityDate) %>%
+  filter(n() > 1) %>%
+  nrow()  # should return 0
+
+# show sample
+head(combined_data_by_Id_and_Date %>% 
+  select(Id, SleepActivityDate, TotalHoursAsleep, TotalSteps, SedentaryMinutes))
+
+#[1] 413
+#[1] 940
+#[1] 413
+#[1] 6
+```
+
+Investigate the duplicates found.
+```{r}
+# view the actual duplicate records
+duplicates <- combined_data_by_Id_and_Date %>%
+  group_by(Id, SleepActivityDate) %>%
+  filter(n() > 1) %>%
+  arrange(Id, SleepActivityDate)
+
+View(duplicates)
+```
+
+Was this duplicated before the merge?
+```{r}
+# check if sleep_day has duplicates BEFORE the merge
+sleep_day %>%
+  group_by(Id, SleepActivityDate) %>%
+  filter(n() > 1) %>%
+  nrow()
+
+# check if daily_activity has duplicates
+daily_activity %>%
+  group_by(Id, ActivityDate) %>%
+  filter(n() > 1) %>%
+  nrow()
+
+# [1] 6
+# [1] 0
+```
+
+Duplicates identified in the original data. Now what?
+```{r}
+# remove exact duplicates
+sleep_day_deduplicated <- sleep_day %>%
+  distinct(Id, SleepActivityDate, .keep_all = TRUE)
+
+# then merge
+combined_data_by_Id_and_Date <- merge(sleep_day_deduplicated, daily_activity, 
+                       by.x=c("Id", "SleepActivityDate"), 
+                       by.y=c("Id", "ActivityDate"))
+```
+
+Check data again
+```{r}
+# check dimensions
+nrow(sleep_day)                        # Original sleep records
+nrow(daily_activity)                   # Original activity records  
+nrow(combined_data_by_Id_and_Date)     # Merged records (should be less than or equal to smallest data set)
+
+# verify no duplicates were created
+combined_data_by_Id_and_Date %>%
+  group_by(Id, SleepActivityDate) %>%
+  filter(n() > 1) %>%
+  nrow()  # should return 0
+
+# show sample
+head(combined_data_by_Id_and_Date %>% 
+  select(Id, SleepActivityDate, TotalHoursAsleep, TotalSteps, SedentaryMinutes))
+
+#[1] 413
+#[1] 940
+#[1] 410
+#[1] 0
+```
+
+Let's explore this combined data.
+```{r}
+# Summary of combined data
+summary(combined_data_by_Id_and_Date %>% 
+  select(TotalHoursAsleep, TotalSteps, SedentaryMinutes, Calories))
+
+# How many unique participants in the combined dataset?
+length(unique(combined_data_by_Id_and_Date$Id))
+
+# Average records per participant
+410 / length(unique(combined_data_by_Id_and_Date$Id))
+
+
+# TotalHoursAsleep    TotalSteps    SedentaryMinutes    Calories   
+# Min.   : 0.9667   Min.   :   17   Min.   :   0.0   Min.   : 257  
+# 1st Qu.: 6.0167   1st Qu.: 5189   1st Qu.: 631.2   1st Qu.:1841  
+# Median : 7.2083   Median : 8913   Median : 717.0   Median :2207  
+# Mean   : 6.9862   Mean   : 8515   Mean   : 712.1   Mean   :2389  
+# 3rd Qu.: 8.1667   3rd Qu.:11370   3rd Qu.: 782.8   3rd Qu.:2920  
+# Max.   :13.2667   Max.   :22770   Max.   :1265.0   Max.   :4900  
+# [1] 24
+# [1] 17.08333
+```
+
+What This Means for Your Bellabeat Case Study?
+
+```{r}
+# Scatter plot: Sleep vs Steps
+ggplot(data=combined_data_by_Id_and_Date, aes(x=TotalHoursAsleep, y=TotalSteps)) + 
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", se = TRUE, color = "blue") +
+  labs(title = "Relationship Between Sleep Duration and Daily Steps",
+       x = "Total Hours Asleep",
+       y = "Total Steps",
+       caption = "Data from 410 matched daily FitBit records") +
+  theme_minimal()
+
+# Save plot
+ggsave("Sleep_Duration_and_Daily_Steps.png", width = 8, height = 6)
+```
+From the scatter plot:
+
+  - Clear downward trend line
+  - People sleeping 8+ hours average around 6,000-8,000 steps
+  - People sleeping <6 hours average around 9,000-12,000 steps
+  - Wide variation exists, but the pattern is consistent
+
+Calculate the correlation
+```{r}
+# Calculate correlation coefficient
+correlation <- cor(combined_data_by_Id_and_Date$TotalHoursAsleep, 
+                   combined_data_by_Id_and_Date$TotalSteps, 
+                   use = "complete.obs")
+
+print(paste("Correlation between sleep and steps:", round(correlation, 3)))
+
+# Statistical test
+cor_test <- cor.test(combined_data_by_Id_and_Date$TotalHoursAsleep, 
+                     combined_data_by_Id_and_Date$TotalSteps)
+print(cor_test)
+
+
+#[1] "Correlation between sleep and steps: -0.19"
+
+#	Pearson's product-moment correlation
+
+#data:  combined_data_by_Id_and_Date$TotalHoursAsleep and combined_data_by_Id_and_Date$TotalSteps
+#t = -3.9164, df = 408, p-value = 0.0001054
+#alternative hypothesis: true correlation is not equal to 0
+#95 percent confidence interval:
+# -0.28199288 -0.09525253
+#sample estimates:
+#       cor 
+#-0.1903439
+```
+
+Statistical Results:
+
+  - Correlation: -0.19 (weak to moderate negative correlation)
+  - P-value: 0.0001054 (highly statistically significant - this is NOT random!)
+  - Interpretation: People who sleep MORE tend to take FEWER steps, and vice versa
+
+Take a look at different Sleep Groups
+
+```{r}
+# Create sleep categories
+combined_data_by_Id_and_Date <- combined_data_by_Id_and_Date %>%
+  mutate(SleepCategory = case_when(
+    TotalHoursAsleep < 6 ~ "Poor Sleep (<6 hrs)",
+    TotalHoursAsleep >= 6 & TotalHoursAsleep < 8 ~ "Moderate Sleep (6-8 hrs)",
+    TotalHoursAsleep >= 8 ~ "Good Sleep (8+ hrs)"
+  ))
+
+# Compare average steps by sleep category
+sleep_steps_summary <- combined_data_by_Id_and_Date %>%
+  group_by(SleepCategory) %>%
+  summarise(
+    avg_steps = mean(TotalSteps),
+    median_steps = median(TotalSteps),
+    count = n()
+  )
+
+print(sleep_steps_summary)
+
+# Visualize by category
+ggplot(data=combined_data_by_Id_and_Date, aes(x=SleepCategory, y=TotalSteps, fill=SleepCategory)) +
+  geom_boxplot() +
+  labs(title = "Daily Steps by Sleep Duration Category",
+       x = "Sleep Category",
+       y = "Total Steps") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+# Save plot
+ggsave("Daily_Steps_by_Sleep_Duration_Category.png", width = 8, height = 6)
+
+
+#SleepCategory             avg_steps   median_steps    count
+#<chr>                     <dbl>       <dbl>           <int>
+#Good Sleep (8+ hrs)	      7267.474	  6469.5	        116	
+#Moderate Sleep (6-8 hrs)	8761.253	  9548.0	        194	
+#Poor Sleep (<6 hrs)	      9484.030	  9814.5	        100	
+```
+
+From the boxplot:
+
+  * Poor Sleep (<6 hrs): Median ~10,000 steps (HIGHEST activity!)
+  * Moderate Sleep (6-8 hrs): Median ~9,500 steps
+  * Good Sleep (8+ hrs): Median ~6,500 steps (LOWEST activity)
+
+
+I'm not done yet. How does my combined data compare with the filtered NHANES 
+data?
+
+```{r}
+# First, calculate summary stats for both datasets
+
+# FitBit sleep summary (per person average)
+fitbit_sleep_summary <- combined_data_by_Id_and_Date %>%
+  group_by(Id) %>%
+  summarise(avg_sleep = mean(TotalHoursAsleep, na.rm = TRUE)) %>%
+  mutate(Source = "FitBit Sample (n=24)")
+
+# NHANES sleep summary (females only, remove NAs)
+nhanes_sleep_summary <- NHANES_females %>%
+  filter(!is.na(SleepHrsNight)) %>%
+  select(SleepHrsNight) %>%
+  rename(avg_sleep = SleepHrsNight) %>%
+  mutate(Source = "NHANES Female Population")
+
+# Combine for comparison
+sleep_comparison <- bind_rows(
+  fitbit_sleep_summary %>% select(avg_sleep, Source),
+  nhanes_sleep_summary
+)
+
+# Create comparison plot
+ggplot(sleep_comparison, aes(x = Source, y = avg_sleep, fill = Source)) +
+  geom_boxplot() +
+  geom_hline(yintercept = 7, linetype = "dashed", color = "red") +
+  geom_hline(yintercept = 8, linetype = "dashed", color = "blue") +
+  labs(title = "Sleep Duration: FitBit Sample vs. NHANES Female Population",
+       subtitle = "Red line = 7 hours (minimum recommended), Blue line = 8 hours",
+       x = "",
+       y = "Hours of Sleep per Night") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+# Print summary statistics
+cat("
+FitBit Sleep Summary:
+")
+summary(fitbit_sleep_summary$avg_sleep)
+
+cat("
+NHANES Female Sleep Summary:
+")
+summary(nhanes_sleep_summary$avg_sleep)
+```
+
+```{r}
+# I forgot to include BMI in the combined data set
+# Create a date column in the same format as your other data
+weight_log <- weight_log %>%
+  mutate(WeightActivityDate = substr(Date, 1, nchar(Date) - 12))  # Remove time portion
+```
+
+Merge BMI into Combined Dataset
+```{r}
+# Merge weight/BMI data with your combined sleep/activity data
+combined_data_with_BMI <- combined_data_by_Id_and_Date %>%
+  left_join(weight_log %>% select(Id, WeightActivityDate, BMI), 
+            by = c("Id" = "Id", "SleepActivityDate" = "WeightActivityDate"))
+
+# Check how many records now have BMI
+sum(!is.na(combined_data_with_BMI$BMI))
+
+# View sample
+head(combined_data_with_BMI %>% 
+  select(Id, SleepActivityDate, TotalHoursAsleep, TotalSteps, BMI))
+```
+
+Handle low BMI Match Rate
+```{r}
+# Calculate average BMI per person
+fitbit_person_summary <- combined_data_with_BMI %>%
+  group_by(Id) %>%
+  summarise(
+    avg_sleep = mean(TotalHoursAsleep, na.rm = TRUE),
+    avg_steps = mean(TotalSteps, na.rm = TRUE),
+    avg_BMI = mean(BMI, na.rm = TRUE)
+  ) %>%
+  filter(!is.na(avg_BMI))  # Only keep people who have BMI data
+
+# How many people have BMI data?
+nrow(fitbit_person_summary)
+```
+Create the Comparisons
+```{r}
+# Use this plot in your analysis, it have better formatting.
+
+# FitBit sleep (all people, not just those with BMI)
+fitbit_sleep_all <- combined_data_by_Id_and_Date %>%
+  group_by(Id) %>%
+  summarise(avg_sleep = mean(TotalHoursAsleep, na.rm = TRUE)) %>%
+  mutate(Source = "FitBit Sample")
+
+# NHANES sleep
+nhanes_sleep <- NHANES_females %>%
+  filter(!is.na(SleepHrsNight)) %>%
+  select(SleepHrsNight) %>%
+  rename(avg_sleep = SleepHrsNight) %>%
+  mutate(Source = "NHANES Females")
+
+# Combine
+sleep_comparison <- bind_rows(
+  fitbit_sleep_all %>% select(avg_sleep, Source),
+  nhanes_sleep
+)
+
+# Plot
+ggplot(sleep_comparison, aes(x = Source, y = avg_sleep, fill = Source)) +
+  geom_boxplot() +
+  geom_hline(yintercept = 7, linetype = "dashed", color = "red", alpha = 0.7) +
+  geom_hline(yintercept = 8, linetype = "dashed", color = "blue", alpha = 0.7) +
+  labs(title = "Sleep Duration: FitBit Sample vs. NHANES Female Population",
+       subtitle = "Red line = 7 hours (minimum), Blue line = 8 hours (optimal)",
+       x = "",
+       y = "Hours of Sleep per Night") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c("FitBit Sample" = "#FF6B6B", "NHANES Females" = "#4ECDC4"))
+
+# Summary statistics
+cat("\n=== SLEEP COMPARISON ===\n")
+cat("\nFitBit Sample (n =", nrow(fitbit_sleep_all), "people):\n")
+summary(fitbit_sleep_all$avg_sleep)
+
+cat("\nNHANES Females (n =", nrow(nhanes_sleep), "people):\n")
+summary(nhanes_sleep$avg_sleep)
+
+# Statistical test
+t.test(fitbit_sleep_all$avg_sleep, nhanes_sleep$avg_sleep)
+
+# Save plot
+ggsave("sleepDuration_FitBitvsNHanes.png", width = 8, height = 6)
+```
+
+BMI Distribution
+```{r}
+#install.packages("viridis")
+#library(viridis)
+```
+
+```{r}
+# FitBit BMI (only those who logged weight)
+fitbit_bmi <- fitbit_person_summary %>%
+  filter(!is.na(avg_BMI)) %>%
+  select(avg_BMI) %>%
+  rename(BMI = avg_BMI) %>%
+  mutate(Source = "FitBit Sample")
+
+# NHANES BMI
+nhanes_bmi <- NHANES_females %>%
+  filter(!is.na(BMI)) %>%
+  select(BMI) %>%
+  mutate(Source = "NHANES Females")
+
+# Combine
+bmi_comparison <- bind_rows(fitbit_bmi, nhanes_bmi)
+
+# Plot
+ggplot(bmi_comparison, aes(x = Source, y = BMI, fill = Source)) +
+  geom_boxplot() +
+  geom_hline(yintercept = 25, linetype = "dashed", color = "black", alpha = 0.7) +
+  geom_hline(yintercept = 18.5, linetype = "dashed", color = "gray40", alpha = 0.7) +
+  labs(title = "BMI: FitBit Sample vs. NHANES Female Population",
+       subtitle = "Gray line = 18.5 (underweight), Black line = 25 (overweight)",
+       x = "",
+       y = "Body Mass Index (BMI)") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c("FitBit Sample" = "#9ecae1", "NHANES Females" = "#DE8F05"))
+
+# Summary statistics
+cat("\n=== BMI COMPARISON ===\n")
+cat("\nFitBit Sample (n =", nrow(fitbit_bmi), "people):\n")
+summary(fitbit_bmi$BMI)
+
+cat("\nNHANES Females (n =", nrow(nhanes_bmi), "people):\n")
+summary(nhanes_bmi$BMI)
+
+# Statistical test
+t.test(fitbit_bmi$BMI, nhanes_bmi$BMI)
+
+# Save plot
+ggsave("BMI_FitBitCombinedvsNHanes.png", width = 8, height = 6)
+```
+Combined Summary Table
+```{r}
+# Create comparison table
+comparison_summary <- data.frame(
+  Metric = c("Sleep Duration (hours)", "Sleep Duration (hours)", "Sleep Duration (hours)",
+             "BMI", "BMI", "BMI",
+             "Sample Size", "Sample Size"),
+  Statistic = c("Median", "Mean", "Std Dev",
+                "Median", "Mean", "Std Dev",
+                "Participants", "Records"),
+  FitBit = c(
+    median(fitbit_sleep_all$avg_sleep),
+    mean(fitbit_sleep_all$avg_sleep),
+    sd(fitbit_sleep_all$avg_sleep),
+    median(fitbit_bmi$BMI, na.rm = TRUE),
+    mean(fitbit_bmi$BMI, na.rm = TRUE),
+    sd(fitbit_bmi$BMI, na.rm = TRUE),
+    nrow(fitbit_sleep_all),
+    410
+  ),
+  NHANES = c(
+    median(nhanes_sleep$avg_sleep),
+    mean(nhanes_sleep$avg_sleep),
+    sd(nhanes_sleep$avg_sleep),
+    median(nhanes_bmi$BMI, na.rm = TRUE),
+    mean(nhanes_bmi$BMI, na.rm = TRUE),
+    sd(nhanes_bmi$BMI, na.rm = TRUE),
+    nrow(NHANES_females),
+    nrow(NHANES_females)
+  )
+)
+
+# Round for readability
+comparison_summary$FitBit <- round(comparison_summary$FitBit, 2)
+comparison_summary$NHANES <- round(comparison_summary$NHANES, 2)
+
+print(comparison_summary)
+
+# Save as CSV for your report
+write.csv(comparison_summary, "fitbit_nhanes_comparison.csv", row.names = FALSE)
+```
+
+# CITATIONS          
+
+Industry Statistics You Can Reference:
+From my (Claude) search, here are published statistics you can cite (no download needed):
+
+### Women's fitness tracker usage:
+
+Women are more likely than men to regularly use fitness trackers (25% vs. 18%) 
+Pew Research Center
+
+71% of fitness tracker users are women 
+Coolest Gadgets
+
+Women 55 years of age or younger are most likely to use wearable fitness devices 
+RunRepeat
+
+### Income correlation:
+  
+About 31% of Americans earning $75,000+ use fitness trackers, compared with 12% earning under $30,000 
+Pew Research Center

@@ -12,18 +12,19 @@ The analysis of FitBit fitness tracker data revealed that active women sacrifice
 Negative correlation between sleep duration and daily steps (r = -0.19, p < 0.001), with the most active users being the most sleep-deprived.
 
 ## Tools Used
-- R (tidyverse, ggplot2)
+- R (tidyverse, ggplot2, dplyr)
 - NHANES national health data for validation
 - R Markdown for reproducible analysis
 
 ## Files
-- `FitBit-Case-Study.Rmd` - Full analysis with code
-- `FitBit-Case-Study.pdf` - Final report
+- [FitBit-Case-Study.md](FitBit-Case-Study.md) - Final report
+- [FitBit Case Study Steps.Rmd](FitBit Case Study Steps.Rmd) - Full analysis with code
+- [FitBit-Case-Study.pdf](FitBit-Case-Study.pdf)
 - `raw_data/` - Raw data files
 - `*.png` - Visualization outputs
 
 ## Author
-Lea N Harvin | [Date] | Case Study for  Google Data Analytics Capstone
+Lea N. Harvin | 02/09/2026 | Case Study for Google Data Analytics Capstone
 
 ## Connect With Me 
 

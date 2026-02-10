@@ -1,0 +1,9 @@
+"Metric","Statistic","FitBit","NHANES"
+"Sleep Duration (hours)","Median",6.95,7
+"Sleep Duration (hours)","Mean",6.29,6.99
+"Sleep Duration (hours)","Std Dev",2.28,1.39
+"BMI","Median",24.03,25.56
+"BMI","Mean",24.67,26.77
+"BMI","Std Dev",2.4,7.9
+"Sample Size","Participants",24,5020
+"Sample Size","Records",410,5020
