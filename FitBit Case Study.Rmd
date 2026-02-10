@@ -470,7 +470,7 @@ And in 2024, after everything we've been through collectively, that mission matt
 
 ---
 
-*Analysis completed: [Date]*  
+*Analysis completed: [02/10/2026]*  
 *Data source: FitBit Fitness Tracker Data (April-May 2016) via Kaggle*  
 *Validation: NHANES 2009-2011 National Health Data*  
 *Tools: R (tidyverse, ggplot2), R Markdown*

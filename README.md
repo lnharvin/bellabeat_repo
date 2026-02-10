@@ -4,9 +4,11 @@
 
 ## About This Project 
 
-This case study was completed as part of my Google Data Analytics Certificate and represents the type of user behavior analysis I'm passionate about pursuing professionally, particularly in the fitness technology space with companies like Garmin, Fitbit, Apple, Whoop, Amazfit, and Nike.
+This case study was completed as part of my Google Data Analytics Certificate and represents the type of user behavior analysis I'm passionate about pursuing professionally, particularly in the fitness technology space with companies like Garmin, Fitbit, Apple, Whoop, Amazfit, and Nike or academic institutions with similar interest.
 
 The analysis of FitBit fitness tracker data revealed that active women sacrifice sleep for physical activity, with marketing recommendations for Bellabeat's wellness positioning.
+
+I'm currently working on reformatting some of this work so please be patient with the daily updates until I'm done.
 
 ## Key Finding
 Negative correlation between sleep duration and daily steps (r = -0.19, p < 0.001), with the most active users being the most sleep-deprived.
