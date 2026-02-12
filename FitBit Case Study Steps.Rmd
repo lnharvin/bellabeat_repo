@@ -1,7 +1,7 @@
 ---
 title: "The Sleep-Activity Trade-Off (Pre-COVID Baseline)"
 author: "by Lea N Harvin"
-date: "2026-02-09"
+date: "2026-01-29"
 output:
   github_document: default
   pdf_document: default
@@ -732,23 +732,3 @@ print(comparison_summary)
 write.csv(comparison_summary, "fitbit_nhanes_comparison.csv", row.names = FALSE)
 ```
 
-# CITATIONS          
-
-Industry Statistics You Can Reference:
-From my (Claude) search, here are published statistics you can cite (no download needed):
-
-### Women's fitness tracker usage:
-
-Women are more likely than men to regularly use fitness trackers (25% vs. 18%) 
-Pew Research Center
-
-71% of fitness tracker users are women 
-Coolest Gadgets
-
-Women 55 years of age or younger are most likely to use wearable fitness devices 
-RunRepeat
-
-### Income correlation:
-  
-About 31% of Americans earning $75,000+ use fitness trackers, compared with 12% earning under $30,000 
-Pew Research Center
