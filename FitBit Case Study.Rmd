@@ -3,8 +3,8 @@ title: "The Sleep-Activity Trade-Off (Pre-COVID Baseline)"
 author: "by Lea N. Harvin"
 date: "2026-02-09"
 output:
-  pdf_document: default
   github_document: default
+  pdf_document: default
 ---
 ## Introduction
 
@@ -20,9 +20,9 @@ Co-founder Urška Sršen tasked the marketing analytics team with analyzing real
 
 ### Personal Motivation: Why This Analysis Matters
 
-I relate very well to the women in this dataset. As a half marathon runner and cyclist, I understand the constant balancing act of fitting exercise into an already packed schedule of work, family, and personal commitments. I've been the person who sets a 5:30 AM alarm for a training run despite getting to bed past midnight. I've powered through workdays on 5 hours or less of sleep because "the miles had to get done."
+I relate very well to the women in this dataset. As a half marathon runner and cyclist, I understand the constant balancing act of fitting exercise into an already packed schedule of commitments. I've been the person who sets a 5:30 AM alarm for a training run despite getting to bed past midnight. I've powered through workdays on 5 hours or less of sleep because "the miles had to get done."
 
-That's why I would benefit from a fitness device that notified me when I was sacrificing sleep for activity a tool that encouraged balance, not just achievement. Even as someone who's health-conscious and active, I can do better to balance exercise, work, family, and my personal well-being.
+That's why I would benefit from a fitness device that notified me when I was sacrificing sleep for activity, a tool that encouraged balance, not just achievement. Even as someone who's health-conscious and active, I can do better to balance exercise, work, family, and my personal well-being.
 
 This personal connection shapes my analytical lens. I'm not examining abstract data points; I'm investigating patterns that affect real women's daily lives, including my own.
 
@@ -190,6 +190,7 @@ This reflects real-world usage patterns: activity tracking is passive and automa
 ### Activity Patterns
 ![Scatter plot: Daily Steps vs Sedentary Time](Relationship_Between_Daily_Steps_and_Sedentary_Time.png)
 
+
 **Key Finding**: Despite taking over 7,000 steps daily (median), participants average 17.6 hours of sedentary time. This reveals that daily step counts and sedentary behavior are somewhat independent - users may exercise intentionally but then spend long periods sitting.
 
 The scatter plot above shows a negative correlation between daily steps and 
@@ -259,6 +260,7 @@ From the scatter plot:
 
 ![Boxplot: Daily Steps by Sleep Category](Daily_Steps_by_Sleep_Duration_Category.png)
 
+
 **Segmented Analysis:**
 
 - Poor Sleep (<6 hrs): Median ~10,000 steps (HIGHEST activity!)
@@ -276,6 +278,7 @@ Despite the small FitBit sample (n=24), validating against nationally representa
 
 ![Comparison plot - Sleep Duration: FitBit Sample vs. NHANES Female Population](sleepDuration_FitBitvsNHanes.png)
 
+
 **Comparison Results:**
 
 - FitBit Sample: Median = 6.95 hours, Mean = 6.29 hours
@@ -287,6 +290,7 @@ Despite the small FitBit sample (n=24), validating against nationally representa
 ### BMI Comparison
 
 ![BMI Comparison Plot - colorblind-friendly version](BMI_FitBitCombinedvsNHanes.png)
+
 
 **Comparison Results:**
 

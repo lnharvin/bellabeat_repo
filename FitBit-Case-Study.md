@@ -32,14 +32,13 @@ understanding how health behaviors have evolved in our post-COVID world.
 
 I relate very well to the women in this dataset. As a half marathon
 runner and cyclist, I understand the constant balancing act of fitting
-exercise into an already packed schedule of work, family, and personal
-commitments. I’ve been the person who sets a 5:30 AM alarm for a
-training run despite getting to bed past midnight. I’ve powered through
-workdays on 5 hours or less of sleep because “the miles had to get
-done.”
+exercise into an already packed schedule of commitments. I’ve been the
+person who sets a 5:30 AM alarm for a training run despite getting to
+bed past midnight. I’ve powered through workdays on 5 hours or less of
+sleep because “the miles had to get done.”
 
 That’s why I would benefit from a fitness device that notified me when I
-was sacrificing sleep for activity a tool that encouraged balance, not
+was sacrificing sleep for activity, a tool that encouraged balance, not
 just achievement. Even as someone who’s health-conscious and active, I
 can do better to balance exercise, work, family, and my personal
 well-being.
