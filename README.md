@@ -43,7 +43,7 @@ The implications for fitness technology are clear: devices that celebrate maximu
 ## Repository Contents
 
 ### Main Documents
-- **[FitBit Case Study.md](FitBit Case Study.md)** - **COMPLETE ANALYSIS AND FINDINGS**
+- **[FitBit-Case-Study.md](FitBit-Case-Study.md)** - **COMPLETE ANALYSIS AND FINDINGS**
 - **FitBit Case Study Steps.Rmd** - R Markdown source with executable code
 - **[FitBit-Case-Study.pdf](FitBit-Case-Study.pdf)** - PDF version for easy viewing
 
